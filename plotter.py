@@ -67,53 +67,53 @@ class Plotter:
         # numpy.polyfit(), to produce a function for each one. Otherwise, we will use a simple
         # approximation based on a centre of travel of 1500µS and 10µS per degree
 
-        self.servo_1_parked_pw = servo_1_parked_pw
-        self.servo_1_degree_ms = servo_1_degree_ms
+        # self.servo_1_parked_pw = servo_1_parked_pw
+        # self.servo_1_degree_ms = servo_1_degree_ms
         self.servo_1_parked_angle = servo_1_parked_angle
         self.hysteresis_correction_1 = hysteresis_correction_1
 
-        if servo_1_angle_pws_bidi:
-            # use the bi-directional values to obtain mean values, and a hysteresis correction value
-            servo_1_angle_pws = []
-            differences = []
-            for angle, pws in servo_1_angle_pws_bidi.items():
-                pw = (pws["acw"] + pws["cw"]) / 2
-                servo_1_angle_pws.append([angle, pw])
-                differences.append((pws["acw"] - pws["cw"]) / 2)
-            self.hysteresis_correction_1 = numpy.mean(differences)
+        # if servo_1_angle_pws_bidi:
+        #     # use the bi-directional values to obtain mean values, and a hysteresis correction value
+        #     servo_1_angle_pws = []
+        #     differences = []
+        #     for angle, pws in servo_1_angle_pws_bidi.items():
+        #         pw = (pws["acw"] + pws["cw"]) / 2
+        #         servo_1_angle_pws.append([angle, pw])
+        #         differences.append((pws["acw"] - pws["cw"]) / 2)
+        #     self.hysteresis_correction_1 = numpy.mean(differences)
 
-        if servo_1_angle_pws:
-            servo_1_array = numpy.array(servo_1_angle_pws)
-            self.angles_to_pw_1 = numpy.poly1d(
-                numpy.polyfit(servo_1_array[:, 0], servo_1_array[:, 1], 3)
-            )
+        # if servo_1_angle_pws:
+        #     servo_1_array = numpy.array(servo_1_angle_pws)
+        #     self.angles_to_pw_1 = numpy.poly1d(
+        #         numpy.polyfit(servo_1_array[:, 0], servo_1_array[:, 1], 3)
+        #     )
 
-        else:
-            self.angles_to_pw_1 = self.naive_angles_to_pulse_widths_1
+        # else:
+        #     self.angles_to_pw_1 = self.naive_angles_to_pulse_widths_1
 
-        self.servo_2_parked_pw = servo_2_parked_pw
-        self.servo_2_degree_ms = servo_2_degree_ms
+        # self.servo_2_parked_pw = servo_2_parked_pw
+        # self.servo_2_degree_ms = servo_2_degree_ms
         self.servo_2_parked_angle = servo_2_parked_angle
         self.hysteresis_correction_2 = hysteresis_correction_2
 
-        if servo_2_angle_pws_bidi:
-            # use the bi-directional values to obtain mean values, and a hysteresis correction value
-            servo_2_angle_pws = []
-            differences = []
-            for angle, pws in servo_2_angle_pws_bidi.items():
-                pw = (pws["acw"] + pws["cw"]) / 2
-                servo_2_angle_pws.append([angle, pw])
-                differences.append((pws["acw"] - pws["cw"]) / 2)
-            self.hysteresis_correction_2 = numpy.mean(differences)
+        # if servo_2_angle_pws_bidi:
+        #     # use the bi-directional values to obtain mean values, and a hysteresis correction value
+        #     servo_2_angle_pws = []
+        #     differences = []
+        #     for angle, pws in servo_2_angle_pws_bidi.items():
+        #         pw = (pws["acw"] + pws["cw"]) / 2
+        #         servo_2_angle_pws.append([angle, pw])
+        #         differences.append((pws["acw"] - pws["cw"]) / 2)
+        #     self.hysteresis_correction_2 = numpy.mean(differences)
 
-        if servo_2_angle_pws:
-            servo_2_array = numpy.array(servo_2_angle_pws)
-            self.angles_to_pw_2 = numpy.poly1d(
-                numpy.polyfit(servo_2_array[:, 0], servo_2_array[:, 1], 3)
-            )
+        # if servo_2_angle_pws:
+        #     servo_2_array = numpy.array(servo_2_angle_pws)
+        #     self.angles_to_pw_2 = numpy.poly1d(
+        #         numpy.polyfit(servo_2_array[:, 0], servo_2_array[:, 1], 3)
+        #     )
 
-        else:
-            self.angles_to_pw_2 = self.naive_angles_to_pulse_widths_2
+        # else:
+        #     self.angles_to_pw_2 = self.naive_angles_to_pulse_widths_2
 
         # set some initial values required for moving methods
         self.previous_pw_1 = self.previous_pw_2 = 0
@@ -131,8 +131,8 @@ class Plotter:
                 self.rpi = pigpio.pi()
                 # the pulse frequency should be no higher than 100Hz - higher values could
                 # (supposedly) # damage the servos
-                self.rpi.set_PWM_frequency(14, 50)
-                self.rpi.set_PWM_frequency(15, 50)
+                # self.rpi.set_PWM_frequency(14, 50)
+                # self.rpi.set_PWM_frequency(15, 50)
                 pigpio.exceptions = True
                 self.virtual = False
                 # by default we use a wait factor of 0.01 seconds for better control

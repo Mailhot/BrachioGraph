@@ -20,3 +20,8 @@ Documentation
 -------------
 
 `Complete documentation for the project, with detailed instructions on how to build and use it <https://www.brachiograph.art/>`_
+
+
+brachiograph_step
+-----------------
+`Implementation of a step motor approach to the plotter.`
