@@ -34,26 +34,25 @@ class BrachioGraphStep(Plotter):
         
         previous_steps_1: int = 0,
         previous_steps_2: int = 0,
-        virtual_steps_1: int = 0,
-        virtual_steps_2: int = 0,
+        virtual_pw_1: int = 0,
+        virtual_pw_2: int = 0,
 
         servo_1_pin_1: int = 17,
         servo_1_pin_2: int = 18,
         servo_1_pin_3: int = 27,
         servo_1_pin_4: int = 22,
         servo_1_step_counter: int = 0,
-        servo_1_pins: list = [self.servo_1_pin_1, self.servo_1_pin_2, self.servo_1_pin_3, self.servo_1_pin_4],
         servo_1_step_per_turn: int = 4096,
-        servo_1_parked_angle: int = -90,  # the arm angle in the parked position
+        servo_1_parked_angle: float = -90,  # the arm angle in the parked position
 
         servo_2_pin_1: int = 23,
         servo_2_pin_2: int = 24,
         servo_2_pin_3: int = 25,
         servo_2_pin_4: int = 8,
         servo_2_step_counter: int = 0,
-        servo_2_pins: list = [self.servo_2_pin_1, self.servo_2_pin_2, self.servo_2_pin_3, self.servo_2_pin_4],
         servo_2_step_per_turn: int = 4096,
-        servo_2_parked_angle: int = 90,
+        servo_2_parked_angle: float = 90,
+
 
         # servo_1_parked_pw: int = 1500,  # pulse-widths when parked
         # servo_2_parked_pw: int = 1500,
@@ -61,9 +60,9 @@ class BrachioGraphStep(Plotter):
         # servo_2_degree_ms: int = 10,  # reversed for the mounting of the shoulder servo
         
         
-        # #  ----------------- hysteresis -----------------
-        # hysteresis_correction_1: int = 0,  # hardware error compensation
-        # hysteresis_correction_2: int = 0,
+        #  ----------------- hysteresis -----------------
+        hysteresis_correction_1: int = 0,  # hardware error compensation
+        hysteresis_correction_2: int = 0,
         # #  ----------------- servo angles and pulse-widths in lists -----------------
         # servo_1_angle_pws: tuple = [],  # pulse-widths for various angles
         # servo_2_angle_pws: tuple = [],
@@ -77,7 +76,10 @@ class BrachioGraphStep(Plotter):
         wait: float = None,  # default wait time between operations
         angular_step: float = None,  # default step of the servos in degrees
         resolution: float = None,  # default resolution of the plotter in cm
-    ):
+        ):
+
+        self.servo_1_pins = [servo_1_pin_1, servo_1_pin_2, servo_1_pin_3, servo_1_pin_4],
+        self.servo_2_pins = [servo_2_pin_1, servo_2_pin_2, servo_2_pin_3, servo_2_pin_4],
 
         # set the geometry
         self.inner_arm = inner_arm
@@ -86,21 +88,31 @@ class BrachioGraphStep(Plotter):
         # Set the x and y position state, so it knows its current x/y position.
         self.x = -self.inner_arm
         self.y = self.outer_arm
+        self.step_sequence = step_sequence
+        self.step_sleep = step_sleep
+        self.servo_1_step_per_turn = servo_1_step_per_turn
+        self.servo_2_step_per_turn = servo_2_step_per_turn
+        self.previous_steps_1 = 0
+        self.previous_steps_2 = 0
+        # self.angle_1 = servo_1_parked_angle
+        # self.angle_2 = servo_2_parked_angle
+
+
 
         super().__init__(
             bounds=bounds,
-            step_1_step_per_turn=step_1_step_per_turn,
-            step_2_step_per_turn=step_2_step_per_turn,
+            
+            
             # servo_1_parked_pw=servo_1_parked_pw,
             # servo_2_parked_pw=servo_2_parked_pw,
             # servo_1_degree_ms=servo_1_degree_ms,
             # servo_2_degree_ms=servo_2_degree_ms,
             servo_1_parked_angle=servo_1_parked_angle,
             servo_2_parked_angle=servo_2_parked_angle,
-            # hysteresis_correction_1=hysteresis_correction_1,
-            # hysteresis_correction_2=hysteresis_correction_2,
-            servo_1_angle_pws=servo_1_angle_pws,
-            servo_2_angle_pws=servo_2_angle_pws,
+            hysteresis_correction_1=hysteresis_correction_1,
+            hysteresis_correction_2=hysteresis_correction_2,
+            # servo_1_angle_pws=servo_1_angle_pws,
+            # servo_2_angle_pws=servo_2_angle_pws,
             # servo_1_angle_pws_bidi=servo_1_angle_pws_bidi,
             # servo_2_angle_pws_bidi=servo_2_angle_pws_bidi,
             pw_up=pw_up,
@@ -293,7 +305,7 @@ class BrachioGraphStep(Plotter):
             self.pulse_widths_used_1.add(int(steps_1))
 
         if angle_2 is not None:
-            steps_2 = self.angles_to_steps_2(angle_2, self.angle_2, self.servo_2_step_per_turn)
+            steps_2 = self.angles_to_steps(angle_2, self.angle_2, self.servo_2_step_per_turn)
 
             if steps_2 > self.previous_steps_2:
                 self.active_hysteresis_correction_2 = self.hysteresis_correction_2
@@ -315,7 +327,7 @@ class BrachioGraphStep(Plotter):
 
         self.set_steps(steps_1, steps_2)
 
-    def angles_to_steps(angle, previous_angle, steps_per_turn):
+    def angles_to_steps(self, angle, previous_angle, steps_per_turn):
         # This function converts a desired angle (angle) and a current position angle (previous_angle)
         # to a step count (positive is clockwise, negative is counterclockwise).
 
@@ -336,7 +348,7 @@ class BrachioGraphStep(Plotter):
                 # limit attainable space between -90 and 90 degree for first step motor
                 next_steps_1 = steps_1 + self.angle_1 * self.servo_1_step_per_turn
                 if -2048 < next_steps_1 < 2048:
-                    self.virtual_steps_1 = int(steps_1)
+                    self.virtual_pw_1 = int(steps_1)
                 else:
                     raise ValueError
 
@@ -344,7 +356,7 @@ class BrachioGraphStep(Plotter):
                 # limit attainable space between -90 and 90 degree for second step motor
                 next_steps_2 = steps_2 + self.angle_2 * self.servo_2_step_per_turn
                 if -2048 < next_steps_2 < 2048:
-                    self.virtual_steps_2 = int(steps_2)
+                    self.virtual_pw_2 = int(steps_2)
                 else:
                     raise ValueError
 
@@ -390,3 +402,13 @@ class BrachioGraphStep(Plotter):
                 except KeyboardInterrupt:
                     cleanup()
                     exit( 1 )
+
+    def virtualise(self):
+
+        print("Initialising virtual BrachioGraph")
+        # The step position is 0 at origin angle and then varies positive or negative.
+        # we keep the pw name even if is should be steps for compatibility with plotter.
+
+        self.virtual_pw_1 = 0
+        self.virtual_pw_2 = 0
+        self.virtual = True

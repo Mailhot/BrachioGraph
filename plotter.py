@@ -152,6 +152,8 @@ class Plotter:
         self.angular_step = angular_step or 0.1
         self.resolution = resolution or 0.1
 
+        self.angle_1 = servo_1_parked_angle
+        self.angle_2 = servo_2_parked_angle
         self.set_angles(self.servo_1_parked_angle, self.servo_2_parked_angle)
         sleep(1)
 
